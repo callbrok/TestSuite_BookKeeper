@@ -227,6 +227,7 @@
             <version>${nar-maven-plugin.version}</version>
             <extensions>true</extensions>
             <configuration>
+              <aol>amd64.Windows.mingw</aol>
               <runtime>${nar.runtime}</runtime>
               <output>circe-checksum</output>
               <libraries>
