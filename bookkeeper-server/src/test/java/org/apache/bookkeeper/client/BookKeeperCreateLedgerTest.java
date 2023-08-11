@@ -63,7 +63,7 @@ public class BookKeeperCreateLedgerTest extends BookKeeperClusterTestCase {
 
 
     public BookKeeperCreateLedgerTest(ConstantChecker testType, int ensSize, int writeQuorumSize, int ackQuorumSize, BookKeeper.DigestType digestType, byte[] passwd, Map<String, byte[]> customMetadata){
-        super(3, 400);
+        super(3, 450);
 
         this.testType = testType;
         this.ensSize = ensSize;

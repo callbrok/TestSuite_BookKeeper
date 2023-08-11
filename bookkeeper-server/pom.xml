@@ -26,6 +26,13 @@
   <name>Apache BookKeeper :: Server</name>
 
   <dependencies>
+    <!--Added dependency for PIT-->
+    <dependency>
+      <groupId>org.pitest</groupId>
+      <artifactId>pitest-maven</artifactId>
+      <version>${pitest-maven-plugin.version}</version>
+      <type>maven-plugin</type>
+    </dependency>
     <dependency>
       <groupId>org.apache.bookkeeper</groupId>
       <artifactId>bookkeeper-common</artifactId>
@@ -272,16 +279,16 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven-surefire-plugin.version}</version>
-       <!-- <configuration>
-          <rerunFailingTestsCount>2</rerunFailingTestsCount>
-          <trimStackTrace>false</trimStackTrace>
-          <properties>
-            <property>
-              <name>listener</name>
-              <value>org.apache.bookkeeper.common.testing.util.TimedOutTestsListener</value>
-            </property>
-          </properties>
-        </configuration> -->
+        <!-- <configuration>
+           <rerunFailingTestsCount>2</rerunFailingTestsCount>
+           <trimStackTrace>false</trimStackTrace>
+           <properties>
+             <property>
+               <name>listener</name>
+               <value>org.apache.bookkeeper.common.testing.util.TimedOutTestsListener</value>
+             </property>
+           </properties>
+         </configuration> -->
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -316,7 +323,8 @@
     </plugins>
   </build>
   <profiles>
-    <!-- BaDua profile -->
+    
+    <!-- Ba-Dua Profile -->
     <profile>
       <id>badua</id>
       <activation>
@@ -405,8 +413,46 @@
       </build>
     </profile>
 
+    <!-- PIT Profile-->
+    <profile>
+      <id>pit</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <version>${pitest-maven-plugin.version}</version>
+            <configuration>
+              <maxMutationsPerClass>5</maxMutationsPerClass>
+              <verbose>true</verbose>
+              <targetClasses>
+                <param>org.apache.bookkeeper.client.BookKeeper</param>
+              </targetClasses>
+              <targetTests>
+                <param>org.apache.bookkeeper.client.BookKeeperCreateLedgerTest</param>
+                <param>org.apache.bookkeeper.client.BookKeeperDeleteLedgerTest</param>
+                <param>org.apache.bookkeeper.client.BookKeeperOpenLedgerTest</param>
+              </targetTests>
+            </configuration>
+            <executions>
+              <execution>
+                <id>Mutation Report</id>
+                <phase>test-compile</phase>
+                <goals>
+                  <goal>mutationCoverage</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
 
-    <!-- jacocoProfile -->
+
+    <!-- JaCoCo Profile -->
     <profile>
       <id>jacoco</id>
       <activation>
