@@ -323,7 +323,7 @@
     </plugins>
   </build>
   <profiles>
-    
+
     <!-- Ba-Dua Profile -->
     <profile>
       <id>badua</id>
@@ -518,6 +518,7 @@
         </plugins>
       </build>
     </profile>
+
     <!-- test profiles -->
     <profile>
       <id>skipBookKeeperServerTests</id>
