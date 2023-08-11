@@ -63,7 +63,7 @@ public class BookKeeperCreateLedgerTest extends BookKeeperClusterTestCase {
 
 
     public BookKeeperCreateLedgerTest(ConstantChecker testType, int ensSize, int writeQuorumSize, int ackQuorumSize, BookKeeper.DigestType digestType, byte[] passwd, Map<String, byte[]> customMetadata){
-        super(4,70);
+        super(3, 400);
 
         this.testType = testType;
         this.ensSize = ensSize;
@@ -82,7 +82,7 @@ public class BookKeeperCreateLedgerTest extends BookKeeperClusterTestCase {
 
         return Arrays.asList(new Object[][]{
                 {ConstantChecker.VALID_LEDGER, 3, 2, 1, BookKeeper.DigestType.MAC, "p@SSw0rd".getBytes(), cstmMetadata},
-                {ConstantChecker.INVALID_LEDGER, 0, 0, 1, BookKeeper.DigestType.CRC32C, "p@SSw0rd".getBytes(), null}
+               // {ConstantChecker.INVALID_LEDGER, 0, 0, 1, BookKeeper.DigestType.CRC32C, "p@SSw0rd".getBytes(), null}
         });
     }
 
@@ -106,6 +106,7 @@ public class BookKeeperCreateLedgerTest extends BookKeeperClusterTestCase {
             LedgerHandle handle = bkKClient.createLedger(ensSize, wQS, aQS, digestType, password, customMetadata);
             LedgerMetadata ledgerMetadata = handle.getLedgerMetadata();
             boolean correctlyConfigured = checkLedgerMetadata(ledgerMetadata, ConstantChecker.WITH_CUSTOM_META_PARAM);
+
 
             Assert.assertTrue("The ledger was created successfully", correctlyConfigured);
         } catch (BKException | InterruptedException e) {

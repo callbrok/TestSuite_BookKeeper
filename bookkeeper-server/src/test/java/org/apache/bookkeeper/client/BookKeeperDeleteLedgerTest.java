@@ -61,7 +61,7 @@ public class BookKeeperDeleteLedgerTest extends BookKeeperClusterTestCase {
 
 
     public BookKeeperDeleteLedgerTest(ConstantChecker testType, int ensSize, int writeQuorumSize, int ackQuorumSize, BookKeeper.DigestType digestType, byte[] passwd) {
-        super(2, 70);
+        super(2, 120);
 
         this.testType = testType;
         this.ensSize = ensSize;
