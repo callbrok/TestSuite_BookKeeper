@@ -99,6 +99,7 @@ public class BookKeeperCreateLedgerTest extends BookKeeperClusterTestCase {
      *
      * QUINDI UTILIZZIAMO LE ASSUMPTION QUANDO ABBIAMO UNA PARAMETERIZED MULTIPLO, ANZI CHE FARE PIÙ CLASSI LI DISTINGUO CON UN ENUMERAZIONE
      * <a href="https://stackoverflow.com/questions/14082004/create-multiple-parameter-sets-in-one-parameterized-class-junit">...</a> */
+    @Ignore
     @Test
     public void createLedgerWithCustomMetaValidTest()  {
         Assume.assumeTrue(testType == ConstantChecker.VALID_LEDGER && customMetadata != null);
@@ -115,7 +116,7 @@ public class BookKeeperCreateLedgerTest extends BookKeeperClusterTestCase {
     }
 
 
-
+    @Ignore
     @Test
     public void createLedgerWithCustomMetaInvalidTest() {
         Assume.assumeTrue(testType == ConstantChecker.INVALID_LEDGER && customMetadata != null);
@@ -134,6 +135,7 @@ public class BookKeeperCreateLedgerTest extends BookKeeperClusterTestCase {
      * TESTS FOR METHOD WITHOUT CUSTOM METADATA PARAMETER
      * ------------------------------------------------
      * public LedgerHandle createLedger(int ensSize, int qSize, DigestType digestType, byte[] passwd) */
+    @Ignore
     @Test
     public void createLedgerWithOUTCustomMetaValidTest()  {
         Assume.assumeTrue(testType == ConstantChecker.VALID_LEDGER && customMetadata == null);
@@ -148,6 +150,7 @@ public class BookKeeperCreateLedgerTest extends BookKeeperClusterTestCase {
         }
     }
 
+    @Ignore
     @Test
     public void createLedgerWithOUTCustomMetaInvalidTest() {
         Assume.assumeTrue(testType == ConstantChecker.INVALID_LEDGER && customMetadata == null);

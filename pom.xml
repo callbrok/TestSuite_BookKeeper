@@ -116,7 +116,7 @@
     <test.additional.args />
 
 
-    <sonar.coverage.jacoco.xmlReportPaths>../jacoco-code-coverage/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/jacoco-code-coverage/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 
     <!-- dependencies -->
     <pitest-maven-plugin.version>1.5.1</pitest-maven-plugin.version>
@@ -1124,6 +1124,7 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco-maven-plugin.version}</version>
             <executions>
               <execution>
                 <id>prepare-agent</id>

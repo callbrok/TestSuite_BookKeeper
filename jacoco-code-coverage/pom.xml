@@ -47,7 +47,7 @@
 
     <profiles>
         <profile>
-            <id>jacocoProfile</id>
+            <id>jacoco</id>
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
