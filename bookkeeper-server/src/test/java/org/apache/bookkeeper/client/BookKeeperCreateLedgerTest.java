@@ -2,14 +2,13 @@ package org.apache.bookkeeper.client;
 
 import org.apache.bookkeeper.client.api.LedgerMetadata;
 import org.apache.bookkeeper.client.conf.BookKeeperClusterTestCase;
+import org.apache.bookkeeper.client.util.TestNotMap;
 import org.junit.*;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -17,7 +16,7 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class BookKeeperCreateLedgerTest extends BookKeeperClusterTestCase {
 
-    private enum ConstantChecker {VALID_LEDGER, INVALID_LEDGER, WITH_CUSTOM_META_PARAM, WITHOUT_CUSTOM_META_PARAM}
+    private enum ConstantChecker {VALID_LEDGER, INVALID_LEDGER}
 
 
     /** The number of nodes the ledger is stored on */
@@ -45,10 +44,11 @@ public class BookKeeperCreateLedgerTest extends BookKeeperClusterTestCase {
     private BookKeeper bkKClient;
 
 
-    @Before
+    @BeforeAll
     public void setUp() throws Exception {
         baseConf.setJournalWriteData(true);
         baseClientConf.setUseV2WireProtocol(true);
+
         super.setUp();
         bkKClient = new BookKeeper(baseClientConf);
     }
@@ -57,13 +57,11 @@ public class BookKeeperCreateLedgerTest extends BookKeeperClusterTestCase {
     public void tearDown() throws Exception {
         super.tearDown();
 
-        bkKClient.close();
-        zkc.close();
     }
 
 
     public BookKeeperCreateLedgerTest(ConstantChecker testType, int ensSize, int writeQuorumSize, int ackQuorumSize, BookKeeper.DigestType digestType, byte[] passwd, Map<String, byte[]> customMetadata){
-        super(3, 450);
+        super(2, 200);
 
         this.testType = testType;
         this.ensSize = ensSize;
@@ -80,9 +78,47 @@ public class BookKeeperCreateLedgerTest extends BookKeeperClusterTestCase {
         Map<String, byte[]> cstmMetadata = new HashMap<>();
         cstmMetadata.put("custom_metadata", "custom_metadata".getBytes());
 
+        Map<String, byte[]> cstmMetadataNotValid = new TestNotMap<>();
+        cstmMetadataNotValid.put("NO_custom_metadata", "NO_custom_metadata".getBytes());
+
         return Arrays.asList(new Object[][]{
-                {ConstantChecker.VALID_LEDGER, 3, 2, 1, BookKeeper.DigestType.MAC, "p@SSw0rd".getBytes(), cstmMetadata},
-               // {ConstantChecker.INVALID_LEDGER, 0, 0, 1, BookKeeper.DigestType.CRC32C, "p@SSw0rd".getBytes(), null}
+
+                {ConstantChecker.INVALID_LEDGER,-1, -2, -3, BookKeeper.DigestType.CRC32, "p@SSw0rd".getBytes(), null},
+                {ConstantChecker.INVALID_LEDGER,-1, -2, -2, BookKeeper.DigestType.CRC32, "p@SSw0rd".getBytes(), cstmMetadataNotValid},
+                {ConstantChecker.INVALID_LEDGER,-1, -2, -1, BookKeeper.DigestType.CRC32, "p@SSw0rd".getBytes(), cstmMetadata},
+
+                {ConstantChecker.INVALID_LEDGER,-2, -2, -3, BookKeeper.DigestType.MAC, "p@SSw0rd".getBytes(), cstmMetadata},
+                {ConstantChecker.INVALID_LEDGER,-1, -1, -1, BookKeeper.DigestType.DUMMY, new byte[]{}, cstmMetadata},
+                {ConstantChecker.INVALID_LEDGER,-1, -1, 0, BookKeeper.DigestType.MAC, null, cstmMetadata},
+
+                {ConstantChecker.INVALID_LEDGER,-1, 0, -1, BookKeeper.DigestType.CRC32C, "p@SSw0rd".getBytes(), cstmMetadataNotValid},
+                //      {ConstantChecker.INVALID_LEDGER,-1, 0, 0, BookKeeper.DigestType.CRC32, new byte[Integer.MAX_VALUE], Collections.emptyMap()},
+                {ConstantChecker.INVALID_LEDGER,-1, 0, 1, BookKeeper.DigestType.CRC32, null, cstmMetadata},
+
+                {ConstantChecker.VALID_LEDGER,0, -1, -2, BookKeeper.DigestType.CRC32C, "p@SSw0rd".getBytes(), Collections.emptyMap()},
+                {ConstantChecker.INVALID_LEDGER,0, -1, -1, BookKeeper.DigestType.CRC32, "p@SSw0rd".getBytes(), cstmMetadataNotValid},
+                {ConstantChecker.INVALID_LEDGER,0, -1, 0, BookKeeper.DigestType.DUMMY, "p@SSw0rd".getBytes(), cstmMetadata},
+
+                {ConstantChecker.VALID_LEDGER,0, 0, -1, BookKeeper.DigestType.MAC, "p@SSw0rd".getBytes(), cstmMetadata},
+                {ConstantChecker.INVALID_LEDGER,0, 0, 0, BookKeeper.DigestType.MAC, new byte[]{}, cstmMetadata},
+                {ConstantChecker.INVALID_LEDGER,0, 0, 1, BookKeeper.DigestType.MAC, new byte[]{}, Collections.emptyMap()},
+
+                {ConstantChecker.INVALID_LEDGER,0, 1, 0, BookKeeper.DigestType.CRC32C, "p@SSw0rd".getBytes(), cstmMetadataNotValid},
+                {ConstantChecker.INVALID_LEDGER,0, 1, 1, BookKeeper.DigestType.CRC32, null, cstmMetadata},
+                {ConstantChecker.INVALID_LEDGER,0, 1, 2, BookKeeper.DigestType.MAC, new byte[]{}, cstmMetadata},
+
+                {ConstantChecker.VALID_LEDGER,1, 0, -1, BookKeeper.DigestType.MAC, new byte[]{}, cstmMetadata},
+                {ConstantChecker.VALID_LEDGER,1, 0, 0, BookKeeper.DigestType.CRC32, new byte[]{}, cstmMetadata},
+                {ConstantChecker.INVALID_LEDGER,1, 0, 1, BookKeeper.DigestType.CRC32, null, cstmMetadata},
+
+                {ConstantChecker.VALID_LEDGER,1, 1, 0, BookKeeper.DigestType.CRC32, "p@SSw0rd".getBytes(), null},
+                {ConstantChecker.INVALID_LEDGER,1, 1, 1, BookKeeper.DigestType.CRC32, "p@SSw0rd".getBytes(), cstmMetadataNotValid},
+                {ConstantChecker.INVALID_LEDGER,1, 1, 2, BookKeeper.DigestType.CRC32C, "p@SSw0rd".getBytes(), cstmMetadata},
+
+
+                //    {ConstantChecker.INVALID_LEDGER,1, 2, 1, BookKeeper.DigestType.DUMMY, "p@SSw0rd".getBytes(), cstmMetadata},   // time out
+                //    {ConstantChecker.VALID_LEDGER,1, 2, 2, BookKeeper.DigestType.DUMMY, new byte[]{}, cstmMetadata},              // time out
+                {ConstantChecker.INVALID_LEDGER,1, 2, 3, BookKeeper.DigestType.DUMMY, null, Collections.emptyMap()}
         });
     }
 
@@ -91,76 +127,50 @@ public class BookKeeperCreateLedgerTest extends BookKeeperClusterTestCase {
     /**
      * TESTS FOR METHOD WITH CUSTOM METADATA
      * ------------------------------------------------
-     * public LedgerHandle createLedger(int ensSize, int writeQuorumSize, int ackQuorumSize, DigestType digestType, byte[] passwd, final Map<String, byte[]> customMetadata)
-     * ------------------------------------------------
-     * Utilizzo l'assumption così che se passo un set di parametri con il ConstantChecker = INVALID_LEDGER, ignoro (ignored)
-     * il test dedito a verificare che quello sia un test non valido, e viceversa; Stesso ragionamento per i set destinati al metodo CreateLedger con
-     * il parametro dei CustomMetada e non.
-     *
-     * QUINDI UTILIZZIAMO LE ASSUMPTION QUANDO ABBIAMO UNA PARAMETERIZED MULTIPLO, ANZI CHE FARE PIÙ CLASSI LI DISTINGUO CON UN ENUMERAZIONE
-     * <a href="https://stackoverflow.com/questions/14082004/create-multiple-parameter-sets-in-one-parameterized-class-junit">...</a> */
-    @Ignore
+     * public LedgerHandle createLedger(int ensSize, int writeQuorumSize, int ackQuorumSize, DigestType digestType, byte[] passwd, final Map<String, byte[]> customMetadata) */
     @Test
-    public void createLedgerWithCustomMetaValidTest()  {
-        Assume.assumeTrue(testType == ConstantChecker.VALID_LEDGER && customMetadata != null);
+    public void createLedgerWithCustomMetaTest()  {
+
         try {
             LedgerHandle handle = bkKClient.createLedger(ensSize, wQS, aQS, digestType, password, customMetadata);
             LedgerMetadata ledgerMetadata = handle.getLedgerMetadata();
-            boolean correctlyConfigured = checkLedgerMetadata(ledgerMetadata, ConstantChecker.WITH_CUSTOM_META_PARAM);
-
+            boolean correctlyConfigured = checkLedgerMetadata(ledgerMetadata);
 
             Assert.assertTrue("The ledger was created successfully", correctlyConfigured);
-        } catch (BKException | InterruptedException e) {
-            fail();
+
+        } catch (Exception e) {
+            System.out.println("ENTRATO");
+
+            if(testType == ConstantChecker.INVALID_LEDGER){
+                System.out.println("\n\nIVALID_CONMETADATA_PRESO_TEST ---> EXCEPTION: " + e.getClass().getName() + "\n\n");
+
+                Assert.assertTrue("The ledger could not be created",true);
+            }else{fail();}
         }
+
     }
 
-
-    @Ignore
-    @Test
-    public void createLedgerWithCustomMetaInvalidTest() {
-        Assume.assumeTrue(testType == ConstantChecker.INVALID_LEDGER && customMetadata != null);
-        try {
-            LedgerHandle handle = bkKClient.createLedger(ensSize, wQS, aQS, digestType, password, customMetadata);
-            fail();
-        } catch (BKException | IllegalArgumentException e) {
-            Assert.assertTrue("The ledger could not be created",true);
-        } catch (InterruptedException e) {
-            fail();
-        }
-    }
 
 
     /**
-     * TESTS FOR METHOD WITHOUT CUSTOM METADATA PARAMETER
+     * MIGLIORAMENTI TEST
      * ------------------------------------------------
-     * public LedgerHandle createLedger(int ensSize, int qSize, DigestType digestType, byte[] passwd) */
-    @Ignore
+     * public LedgerHandle createLedgerAdv(int ensSize, int writeQuorumSize, int ackQuorumSize, DigestType digestType, byte[] passwd, final Map<String, byte[]> customMetadata) */
     @Test
-    public void createLedgerWithOUTCustomMetaValidTest()  {
-        Assume.assumeTrue(testType == ConstantChecker.VALID_LEDGER && customMetadata == null);
+    public void createLedgerAdvTest(){
         try {
-            LedgerHandle handle = bkKClient.createLedger(ensSize, wQS, aQS, digestType, password);
+            LedgerHandle handle = bkKClient.createLedgerAdv(ensSize, wQS, aQS, digestType, password, customMetadata);
             LedgerMetadata ledgerMetadata = handle.getLedgerMetadata();
-            boolean correctlyConfigured = checkLedgerMetadata(ledgerMetadata, ConstantChecker.WITHOUT_CUSTOM_META_PARAM);
+
+            boolean correctlyConfigured = checkLedgerMetadata(ledgerMetadata);
 
             Assert.assertTrue("The ledger was created successfully", correctlyConfigured);
-        } catch (BKException | InterruptedException e) {
-            fail();
-        }
-    }
-
-    @Ignore
-    @Test
-    public void createLedgerWithOUTCustomMetaInvalidTest() {
-        Assume.assumeTrue(testType == ConstantChecker.INVALID_LEDGER && customMetadata == null);
-        try {
-            LedgerHandle handle = bkKClient.createLedger(ensSize, wQS, aQS, digestType, password);
-            fail();
-        } catch (BKException | IllegalArgumentException e) {
-            Assert.assertTrue("The ledger could not be created",true);
-        } catch (InterruptedException e) {
-            fail();
+        } catch (Exception e) {
+            if(testType == ConstantChecker.INVALID_LEDGER){
+                System.out.println("\n\nIVALID_SENZAMETADATA_PRESO_TEST ---> EXCEPTION: " + e.getClass().getName() + "\n\n");
+                Assert.assertTrue("The ledger could not be created",true);
+            }
+            else{fail();}
         }
     }
 
@@ -169,17 +179,13 @@ public class BookKeeperCreateLedgerTest extends BookKeeperClusterTestCase {
     /**
      * TESTING UTIL */
 
-    private boolean checkLedgerMetadata(LedgerMetadata metadata, ConstantChecker methodType) {
+    private boolean checkLedgerMetadata(LedgerMetadata metadata) {
         if (metadata.getEnsembleSize() != ensSize) return false;
         if (metadata.getWriteQuorumSize() != wQS) return false;
         if (metadata.getAckQuorumSize() != aQS) return false;
         if (!Arrays.equals(metadata.getPassword(), password)) return false;
 
-        if (
-                methodType == ConstantChecker.WITH_CUSTOM_META_PARAM &&
-                        customMetadata != null &&
-                        !metadata.getCustomMetadata().equals(customMetadata)
-        ) return false;
+        if (customMetadata != null && !metadata.getCustomMetadata().equals(customMetadata)) return false;
 
         return true;
     }

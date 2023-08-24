@@ -15,20 +15,17 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class BookKeeperOpenLedgerTest extends BookKeeperClusterTestCase {
 
-    private enum ConstantChecker {VALID_PASSWORD, INVALID_PASSWORD, LEDGER_ID_NOT_EXIST}
+    private enum ConstantChecker {INVALID_OPEN, VALID_OPEN}
 
-
-    /** Contains ledger metadata and is used to access the read and write operations to a ledger. */
-    private LedgerHandle handle = null;
 
     /** The default digest type used for opening ledgers. (CRC32) */
     private BookKeeper.DigestType digestType;
 
-    /** The default password used for opening ledgers. Default value is empty string. */
-    private byte[] passwordToSet;
-
     /** Password used to open ledger */
     private byte[] passwordToUse;
+
+    /** Id of ledger to open */
+    private long idToUse;
 
 
     private ConstantChecker testType;
@@ -57,37 +54,38 @@ public class BookKeeperOpenLedgerTest extends BookKeeperClusterTestCase {
     @Parameterized.Parameters
     public static Collection<Object[]> getParameters()  {
         return Arrays.asList(new Object[][]{
-                {ConstantChecker.VALID_PASSWORD, BookKeeper.DigestType.MAC, "p@SSw0rd".getBytes(), "p@SSw0rd".getBytes()},
-              //  {ConstantChecker.INVALID_PASSWORD, BookKeeper.DigestType.CRC32C, "p@SSw0rd".getBytes(), "n0t-p@SSw0rd".getBytes()},
+                {ConstantChecker.VALID_OPEN, 0, BookKeeper.DigestType.CRC32, "p@SSw0rd".getBytes()},
+                {ConstantChecker.INVALID_OPEN, -1, BookKeeper.DigestType.DUMMY, null},
+                {ConstantChecker.INVALID_OPEN, 0, BookKeeper.DigestType.CRC32, "n0t-p@SSw0rd".getBytes()},
+                {ConstantChecker.INVALID_OPEN, 1, BookKeeper.DigestType.CRC32C, new byte[]{}},
+                // {ConstantChecker.INVALID_OPEN, 0, BookKeeper.DigestType.MAC, new byte[Integer.MAX_VALUE]}
         });
     }
 
 
-    public BookKeeperOpenLedgerTest(ConstantChecker testType, BookKeeper.DigestType digestType, byte[] passwdToSet, byte[] passwdToUse)  {
-        super(3, 120);
+    public BookKeeperOpenLedgerTest(ConstantChecker testType, long idToUse, BookKeeper.DigestType digestType, byte[] passwdToUse)  {
+        super(2, 70);
 
         this.testType = testType;
+        this.idToUse = idToUse;
         this.digestType = digestType;
-        this.passwordToSet = passwdToSet;
         this.passwordToUse = passwdToUse;
     }
 
 
 
-    /** Assumo che creo un ledger valido quindi si crea un handle, la password e giusta e quindi mi aspetto l'apertura, la scrittura e la lettura*/
     @Test
-    public void openLedgerValidTest() throws BKException, InterruptedException {
-        Assume.assumeTrue(testType == ConstantChecker.VALID_PASSWORD);
+    public void openLedgerTest() throws BKException, InterruptedException {
 
-        this.handle = bkKClient.createLedger(1,1,1, digestType, passwordToSet, null);
+        LedgerHandle handle = bkKClient.createLedger(1,1,1, BookKeeper.DigestType.CRC32, "p@SSw0rd".getBytes(), null);
 
         try {
             String entryToAdd = "R@nd0m 1nf0rm@t10n";
 
-            this.handle.addEntry(entryToAdd.getBytes());
-            this.handle.close();
+            handle.addEntry(entryToAdd.getBytes());
+            handle.close();
 
-            LedgerHandle newHandle = bkKClient.openLedger(this.handle.getId(), digestType, passwordToUse);
+            LedgerHandle newHandle = bkKClient.openLedger(this.idToUse, this.digestType, this.passwordToUse);
             LedgerEntry entry = newHandle.readLastEntry();
             byte[] entryContent = entry.getEntry();
 
@@ -96,64 +94,14 @@ public class BookKeeperOpenLedgerTest extends BookKeeperClusterTestCase {
             Assert.assertTrue("The ledger was successfully opened", entryCorrect);
             newHandle.close();
 
-        }catch (BKException | InterruptedException e){
-            fail();
+        }catch (Exception e){
+            if(testType == ConstantChecker.INVALID_OPEN){
+                System.out.println("\n\nECCEZZIONE --> " + e.getClass().getName() + "\n\n");
+                Assert.assertTrue("Impossible to open ledger", true);
+            }else{fail();}
         }
     }
 
-
-    @Test
-    public void openLedgerInvalidTest() throws BKException, InterruptedException {
-        Assume.assumeTrue(testType != ConstantChecker.VALID_PASSWORD);
-
-        /* Se è invalida la password posso comunque creare il ledger */
-        if (testType == ConstantChecker.INVALID_PASSWORD)
-            this.handle = bkKClient.createLedger(1,1,1, digestType, passwordToSet, null);
-
-
-        /* Fallimento dell'apertura dovuto a un identificatore dell'handle inestistente */
-        if (this.handle == null){
-
-            try {
-                /*  Ledger randomico minore di 0 */
-                bkKClient.openLedger(generateInvalidId(), digestType, passwordToUse);
-
-            }catch (BKException | InterruptedException e){
-                Assert.assertTrue("Ledger should not exist", true);
-            }
-        }
-
-        /* Fallimento dell'apertura dovuto all'inserimento di una password non corretta */
-        else {
-            try{
-                String testEntry = "entry test";
-
-                this.handle.addEntry(testEntry.getBytes());
-                this.handle.close();
-
-                bkKClient.openLedger(this.handle.getId(), digestType, passwordToUse);
-
-            }catch (BKException | InterruptedException e ){
-                Assert.assertTrue("Invalid Password", true);
-            }
-
-        }
-    }
-
-
-    /** Genera un numero negativo randomico a 64bit, lo genero a 64 bit dato che dalla documentazione l'identifier del ledger
-     * è definito come segue:
-     *
-     * identifier :   A 64-bit integer, unique within the system */
-    private long generateInvalidId(){
-        Random random = new Random();
-        long randomNumber = random.nextLong();
-
-        /* Imposta il bit più significativo a 1 per ottenere un numero negativo  */
-        randomNumber |= 0x8000000000000000L; /* 0x8000000000000000L rappresenta il bit più significativo a 1 per un long a 64 bit */
-
-        return randomNumber;
-    }
 
 
 }

@@ -430,11 +430,15 @@
               <verbose>true</verbose>
               <targetClasses>
                 <param>org.apache.bookkeeper.client.BookKeeper</param>
+                <param>org.apache.bookkeeper.bookie.storage.ldb.ReadCache</param>
               </targetClasses>
               <targetTests>
-                <param>org.apache.bookkeeper.client.BookKeeperCreateLedgerTest</param>
-                <param>org.apache.bookkeeper.client.BookKeeperDeleteLedgerTest</param>
+                <param>org.apache.bookkeeper.client.BookKeeperCreateLedgerTest</param> <!-- 54 min -->
+                <param>org.apache.bookkeeper.client.BookKeeperDeleteLedgerTest</param> <!-- 46 min -->
                 <param>org.apache.bookkeeper.client.BookKeeperOpenLedgerTest</param>
+                <param>org.apache.bookkeeper.bookie.storage.ldb.ReadCacheGetTest</param>
+                <param>org.apache.bookkeeper.bookie.storage.ldb.ReadCacheHasEntryTest</param>
+                <param>org.apache.bookkeeper.bookie.storage.ldb.ReadCachePutTest</param>
               </targetTests>
             </configuration>
             <executions>

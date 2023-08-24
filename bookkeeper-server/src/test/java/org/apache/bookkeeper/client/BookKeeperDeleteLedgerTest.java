@@ -20,22 +20,8 @@ public class BookKeeperDeleteLedgerTest extends BookKeeperClusterTestCase {
 
     private enum ConstantChecker {VALID_DELETE, INVALID_DELETE}
 
-
-    /** The number of nodes the ledger is stored on */
-    private int ensSize;
-
-    /** The number of nodes each entry is written to. In effect, the max replication for the entry. */
-    private int wQS;
-
-    /** The number of nodes an entry must be acknowledged on. In effect, the minimum replication for the entry. */
-    private int aQS;
-
-    /** The default digest type used for opening ledgers. (CRC32) */
-    private BookKeeper.DigestType digestType;
-
-    /** The default password used for opening ledgers. Default value is empty string. */
-    private byte[] password;
-
+    /** Ledger ID */
+    private long ledgerIdToCheck;
 
     private ConstantChecker testType;
 
@@ -60,21 +46,20 @@ public class BookKeeperDeleteLedgerTest extends BookKeeperClusterTestCase {
     }
 
 
-    public BookKeeperDeleteLedgerTest(ConstantChecker testType, int ensSize, int writeQuorumSize, int ackQuorumSize, BookKeeper.DigestType digestType, byte[] passwd) {
+    public BookKeeperDeleteLedgerTest(ConstantChecker testType, long ledgerId) {
         super(2, 120);
 
         this.testType = testType;
-        this.ensSize = ensSize;
-        this.wQS = writeQuorumSize;
-        this.aQS = ackQuorumSize;
-        this.digestType = digestType;
-        this.password = passwd;
+        this.ledgerIdToCheck = ledgerId;
     }
+
 
     @Parameterized.Parameters
     public static Collection<Object[]> getParameters()  {
         return Arrays.asList(new Object[][]{
-                {ConstantChecker.VALID_DELETE, 1, 0, 0, BookKeeper.DigestType.CRC32, "p@SSw0rd".getBytes()}
+                {ConstantChecker.INVALID_DELETE, -1},
+                {ConstantChecker.VALID_DELETE, 0},
+                {ConstantChecker.INVALID_DELETE, 1},
         });
     }
 
@@ -83,27 +68,19 @@ public class BookKeeperDeleteLedgerTest extends BookKeeperClusterTestCase {
     @Test
     public void deleteLedgerTest() throws Exception {
         boolean testPassed = false;
-        long ledgerId;
 
-        /* Se la entry del set dei parametri fa riferimento ad una cancellazione non valida
-         *  cerco di cancellare un ledger non esistente quindi passando un ledger id negativo */
-        if(testType == ConstantChecker.INVALID_DELETE)
-            ledgerId = generateInvalidId();
-
-            /* Altrimenti creo il ledger */
-        else {
-            LedgerHandle handle = bkKClient.createLedger(ensSize, wQS, aQS, digestType, password);
-            ledgerId = handle.getId();
-        }
+        bkKClient.createLedger(1, 1, 1, BookKeeper.DigestType.CRC32, "p@SSw0rd".getBytes());
 
         try {
-            bkKClient.deleteLedger(ledgerId);
+            bkKClient.deleteLedger(this.ledgerIdToCheck);
 
             /* Check if after deleting the ledger still exist */
-            if(!checkExistLedgerId(bkKClient, ledgerId)){ testPassed=true; }
+            if(!checkExistLedgerId(bkKClient, this.ledgerIdToCheck)){ testPassed=true; }
 
-        } catch (InterruptedException | BKException e) {
-            if(testType == ConstantChecker.INVALID_DELETE) testPassed=true;
+        } catch (Exception e) {
+            if(testType == ConstantChecker.INVALID_DELETE){
+                testPassed=true;
+            }else{fail();}
         }
 
         Assert.assertTrue("The ledger was successfully deleted", testPassed);
@@ -128,22 +105,6 @@ public class BookKeeperDeleteLedgerTest extends BookKeeperClusterTestCase {
 
         bkAdmin.close();
         return false;
-    }
-
-
-
-    /** Genera un numero negativo randomico a 64bit, lo genero a 64 bit dato che dalla documentazione l'identifier del ledger
-     * è definito come segue:
-     *
-     * identifier :   A 64-bit integer, unique within the system */
-    private long generateInvalidId(){
-        Random random = new Random();
-        long randomNumber = random.nextLong();
-
-        /* Imposta il bit più significativo a 1 per ottenere un numero negativo  */
-        randomNumber |= 0x8000000000000000L; /* 0x8000000000000000L rappresenta il bit più significativo a 1 per un long a 64 bit */
-
-        return randomNumber;
     }
 
 
