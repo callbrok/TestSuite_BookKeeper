@@ -6,15 +6,23 @@ import org.apache.bookkeeper.client.api.LedgerMetadata;
 import org.apache.bookkeeper.client.conf.BookKeeperClusterTestCase;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.times;
 
 
 @RunWith(Parameterized.class)
@@ -116,6 +124,25 @@ public class BookKeeperCreateLedgerIncrementTest extends BookKeeperClusterTestCa
             else{fail();}
         }
     }
+
+
+    /** STATIC MOCK METHOD for reach LOG branch */
+    @Ignore
+    @Test
+    public void nullHandleMockedScenarioTest(){
+        boolean check = true;
+        try (MockedStatic<SyncCallbackUtils> syncMockedStatic = Mockito.mockStatic(SyncCallbackUtils.class)) {
+            syncMockedStatic.when(() -> SyncCallbackUtils.waitForResult(CompletableFuture.anyOf()))
+                    .thenReturn(null);
+            // when
+            LedgerHandle handle = bkKClient.createLedger(ensSize, wQS, aQS, digestType, password);
+
+        }catch (Throwable e){
+            check = false;
+        }
+        assertTrue(check);
+    }
+
 
     /**
      * TESTS FOR METHOD WITHOUT AQS AND META
