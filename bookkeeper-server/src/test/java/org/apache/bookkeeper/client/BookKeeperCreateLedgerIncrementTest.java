@@ -72,7 +72,7 @@ public class BookKeeperCreateLedgerIncrementTest extends BookKeeperClusterTestCa
 
 
     public BookKeeperCreateLedgerIncrementTest(ConstantChecker testType, int ensSize, int writeQuorumSize, int ackQuorumSize, BookKeeper.DigestType digestType, byte[] passwd){
-        super(3, 200);
+        super(3, 400);
 
         this.testType = testType;
         this.ensSize = ensSize;
@@ -93,6 +93,7 @@ public class BookKeeperCreateLedgerIncrementTest extends BookKeeperClusterTestCa
         return Arrays.asList(new Object[][]{
                            {ConstantChecker.VALID_LEDGER,0, -1, -2, BookKeeper.DigestType.CRC32C, "p@SSw0rd".getBytes()},
                       //   {ConstantChecker.VALID_LEDGER,-1, 0, 0, BookKeeper.DigestType.CRC32, new byte[Integer.MAX_VALUE]},
+                           {ConstantChecker.INVALID_LEDGER,-1, 0, 0, BookKeeper.DigestType.CRC32, new byte[Integer.MAX_VALUE-8]},
                            {ConstantChecker.INVALID_LEDGER_BUT_VALID_FORONLYPASSWORD,0, 0, 1, BookKeeper.DigestType.MAC, new byte[]{}},
                            {ConstantChecker.INVALID_LEDGER,1, 2, 3, BookKeeper.DigestType.DUMMY, null}
         });
@@ -115,10 +116,9 @@ public class BookKeeperCreateLedgerIncrementTest extends BookKeeperClusterTestCa
 
             boolean correctlyConfigured = checkLedgerMetadata(ledgerMetadata, ConstantChecker.NO_META);
 
-            Assert.assertTrue("The ledger was created successfully", correctlyConfigured);
+            Assert.assertTrue("The ledger was not created successfully", correctlyConfigured);
         } catch (Exception e) {
             if(testType != ConstantChecker.VALID_LEDGER){
-                System.out.println("\n\nIVALID_SENZAMETADATA_PRESO_TEST ---> EXCEPTION: " + e.getClass().getName() + "\n\n");
                 Assert.assertTrue("The ledger could not be created",true);
             }
             else{fail();}
@@ -156,14 +156,10 @@ public class BookKeeperCreateLedgerIncrementTest extends BookKeeperClusterTestCa
             LedgerMetadata ledgerMetadata = handle.getLedgerMetadata();
             boolean correctlyConfigured = checkLedgerMetadata(ledgerMetadata, ConstantChecker.NO_AQS);
 
-            Assert.assertTrue("The ledger was created successfully", correctlyConfigured);
+            Assert.assertTrue("The ledger was not created successfully", correctlyConfigured);
 
         } catch (Exception e) {
-            System.out.println("ENTRATO");
-
             if(testType != ConstantChecker.VALID_LEDGER){
-                System.out.println("\n\nIVALID_CONMETADATA_PRESO_TEST ---> EXCEPTION: " + e.getClass().getName() + "\n\n");
-
                 Assert.assertTrue("The ledger could not be created",true);
             }else{fail();}
         }
@@ -183,14 +179,10 @@ public class BookKeeperCreateLedgerIncrementTest extends BookKeeperClusterTestCa
             LedgerMetadata ledgerMetadata = handle.getLedgerMetadata();
             boolean correctlyConfigured = checkLedgerMetadata(ledgerMetadata, ConstantChecker.ONLY_PASSWORD);
 
-            Assert.assertTrue("The ledger was created successfully", correctlyConfigured);
+            Assert.assertTrue("The ledger was not created successfully", correctlyConfigured);
 
         } catch (Exception e) {
-            System.out.println("ENTRATO");
-
             if(testType == ConstantChecker.INVALID_LEDGER){
-                System.out.println("\n\nIVALID_CONMETADATA_PRESO_TEST ---> EXCEPTION: " + e.getClass().getName() + "\n\n");
-
                 Assert.assertTrue("The ledger could not be created",true);
             }else{fail();}
         }

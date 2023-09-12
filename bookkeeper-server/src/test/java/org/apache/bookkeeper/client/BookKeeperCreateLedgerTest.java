@@ -93,7 +93,7 @@ public class BookKeeperCreateLedgerTest extends BookKeeperClusterTestCase {
 
                 {ConstantChecker.INVALID_LEDGER,-1, 0, -1, BookKeeper.DigestType.CRC32C, "p@SSw0rd".getBytes(), cstmMetadataNotValid},
                 //      {ConstantChecker.INVALID_LEDGER,-1, 0, 0, BookKeeper.DigestType.CRC32, new byte[Integer.MAX_VALUE], Collections.emptyMap()},
-                {ConstantChecker.INVALID_LEDGER,-1, 0, 1, BookKeeper.DigestType.CRC32, null, cstmMetadata},
+                {ConstantChecker.INVALID_LEDGER,-1, 0, 1, BookKeeper.DigestType.CRC32, new byte[Integer.MAX_VALUE-8], cstmMetadata},
 
                 {ConstantChecker.VALID_LEDGER,0, -1, -2, BookKeeper.DigestType.CRC32C, "p@SSw0rd".getBytes(), Collections.emptyMap()},
                 {ConstantChecker.INVALID_LEDGER,0, -1, -1, BookKeeper.DigestType.CRC32, "p@SSw0rd".getBytes(), cstmMetadataNotValid},

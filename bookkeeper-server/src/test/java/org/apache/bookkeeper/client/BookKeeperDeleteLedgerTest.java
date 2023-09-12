@@ -83,7 +83,7 @@ public class BookKeeperDeleteLedgerTest extends BookKeeperClusterTestCase {
             }else{fail();}
         }
 
-        Assert.assertTrue("The ledger was successfully deleted", testPassed);
+        Assert.assertTrue("The ledger was not successfully deleted", testPassed);
     }
 
 

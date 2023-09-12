@@ -100,7 +100,6 @@ public class ReadCacheGetTest {
 
 		}catch(Exception e){
 			if(this.testType == ConstantChecker.INVALID_GET_CACHE){
-				System.out.println("\n\nECCEZZIONE --> " + e.getClass().getName() + "\n\n");
 				assertTrue("Impossible to get te entry",true);
 			}else{fail();}
 		}

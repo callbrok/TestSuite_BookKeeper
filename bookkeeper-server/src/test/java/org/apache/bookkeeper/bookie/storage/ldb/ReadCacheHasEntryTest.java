@@ -99,7 +99,6 @@ public class ReadCacheHasEntryTest {
 
 		}catch(Exception e){
 			if(this.testType == ConstantChecker.INVALID_HASENTRY_CACHE){
-				System.out.println("\n\nECCEZZIONE --> " + e.getClass().getName() + "\n\n");
 				assertTrue("Impossible to get te entry",true);
 			}else{fail();}
 		}

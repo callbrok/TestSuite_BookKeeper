@@ -121,7 +121,6 @@ public class ReadCachePutTest {
 
 		}catch (Exception e){
 			if(this.testType == ConstantChecker.INVALID_PUT_ENTRY){
-				System.out.println("\n\nECCEZZIONE --> " + e.getClass().getName() + "\n\n");
 				Assert.assertTrue("Impossible to put the entry", true);
 			}else{fail();}
 		}
