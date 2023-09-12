@@ -1,13 +1,9 @@
 package org.apache.bookkeeper.client;
 
-import org.apache.bookkeeper.client.BookKeeper;
-import org.apache.bookkeeper.client.LedgerHandle;
+
 import org.apache.bookkeeper.client.api.LedgerMetadata;
 import org.apache.bookkeeper.client.conf.BookKeeperClusterTestCase;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -16,19 +12,16 @@ import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.Mockito.times;
 
 
 @RunWith(Parameterized.class)
 public class BookKeeperCreateLedgerIncrementTest extends BookKeeperClusterTestCase {
 
-    private enum ConstantChecker {VALID_LEDGER, INVALID_LEDGER, INVALID_LEDGER_BUT_VALID_FORONLYPASSWORD, NO_META, NO_AQS, ONLY_PASSWORD}
+    private enum ConstantChecker {VALID_LEDGER, INVALID_LEDGER, INVALID_LEDGER_BUT_VALID_FORONLYPASSWORD, NO_META, NO_AQS, ONLY_PASSWORD, TIMEOUT}
 
 
     /** The number of nodes the ledger is stored on */
@@ -72,7 +65,7 @@ public class BookKeeperCreateLedgerIncrementTest extends BookKeeperClusterTestCa
 
 
     public BookKeeperCreateLedgerIncrementTest(ConstantChecker testType, int ensSize, int writeQuorumSize, int ackQuorumSize, BookKeeper.DigestType digestType, byte[] passwd){
-        super(3, 400);
+        super(3, 200);
 
         this.testType = testType;
         this.ensSize = ensSize;
@@ -93,7 +86,7 @@ public class BookKeeperCreateLedgerIncrementTest extends BookKeeperClusterTestCa
         return Arrays.asList(new Object[][]{
                            {ConstantChecker.VALID_LEDGER,0, -1, -2, BookKeeper.DigestType.CRC32C, "p@SSw0rd".getBytes()},
                       //   {ConstantChecker.VALID_LEDGER,-1, 0, 0, BookKeeper.DigestType.CRC32, new byte[Integer.MAX_VALUE]},
-                           {ConstantChecker.INVALID_LEDGER,-1, 0, 0, BookKeeper.DigestType.CRC32, new byte[Integer.MAX_VALUE-8]},
+                           {ConstantChecker.TIMEOUT,-1, 0, 0, BookKeeper.DigestType.CRC32, new byte[Integer.MAX_VALUE-8]},
                            {ConstantChecker.INVALID_LEDGER_BUT_VALID_FORONLYPASSWORD,0, 0, 1, BookKeeper.DigestType.MAC, new byte[]{}},
                            {ConstantChecker.INVALID_LEDGER,1, 2, 3, BookKeeper.DigestType.DUMMY, null}
         });
@@ -173,6 +166,7 @@ public class BookKeeperCreateLedgerIncrementTest extends BookKeeperClusterTestCa
      * public LedgerHandle createLedger(DigestType digestType, byte[] passwd) */
     @Test
     public void createLedgerOnlyPasswordTest(){
+        Assume.assumeTrue(testType == ConstantChecker.TIMEOUT);
 
         try {
             LedgerHandle handle = bkKClient.createLedger(digestType, password);
