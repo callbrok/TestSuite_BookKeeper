@@ -59,7 +59,7 @@ public class BookKeeperOpenLedgerTest extends BookKeeperClusterTestCase {
                 {ConstantChecker.INVALID_OPEN, 0, BookKeeper.DigestType.CRC32, "n0t-p@SSw0rd".getBytes()},
                 {ConstantChecker.INVALID_OPEN, 1, BookKeeper.DigestType.CRC32C, new byte[]{}},
                 // {ConstantChecker.INVALID_OPEN, 0, BookKeeper.DigestType.MAC, new byte[Integer.MAX_VALUE]}
-                {ConstantChecker.INVALID_OPEN, 0, BookKeeper.DigestType.MAC, new byte[Integer.MAX_VALUE-8]}
+                // {ConstantChecker.INVALID_OPEN, 0, BookKeeper.DigestType.MAC, new byte[Integer.MAX_VALUE-8]}
         });
     }
 

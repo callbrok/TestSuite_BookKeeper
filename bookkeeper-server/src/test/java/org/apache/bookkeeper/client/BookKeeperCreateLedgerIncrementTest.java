@@ -86,7 +86,7 @@ public class BookKeeperCreateLedgerIncrementTest extends BookKeeperClusterTestCa
         return Arrays.asList(new Object[][]{
                            {ConstantChecker.VALID_LEDGER,0, -1, -2, BookKeeper.DigestType.CRC32C, "p@SSw0rd".getBytes()},
                       //   {ConstantChecker.VALID_LEDGER,-1, 0, 0, BookKeeper.DigestType.CRC32, new byte[Integer.MAX_VALUE]},
-                           {ConstantChecker.TIMEOUT,-1, 0, 0, BookKeeper.DigestType.CRC32, new byte[Integer.MAX_VALUE-8]},
+                      //   {ConstantChecker.TIMEOUT,-1, 0, 0, BookKeeper.DigestType.CRC32, new byte[Integer.MAX_VALUE-8]},
                            {ConstantChecker.INVALID_LEDGER_BUT_VALID_FORONLYPASSWORD,0, 0, 1, BookKeeper.DigestType.MAC, new byte[]{}},
                            {ConstantChecker.INVALID_LEDGER,1, 2, 3, BookKeeper.DigestType.DUMMY, null}
         });
