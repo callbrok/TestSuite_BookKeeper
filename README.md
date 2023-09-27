@@ -1,6 +1,6 @@
 # Test Suite for Apache BookKeeper
 
-Test suite (unit test and integration test) for the Apache BookKeeper project, and analysis of their adequacy through coverage tools such as [Ba-Dua](https://github.com/saeg/ba-dua) for data coverage,  [JaCoCo](https://github.com/jacoco/jacoco) for statement coverage and branch coverage. Further quality controls of the developed tests were carried out through [Pitest](https://github.com/hcoles/pitest) (aka PIT) tool, to verify their robustness to SUT mutations.
+Test suite for the Apache BookKeeper project, and analysis of their adequacy through coverage tools such as [Ba-Dua](https://github.com/saeg/ba-dua) for data coverage,  [JaCoCo](https://github.com/jacoco/jacoco) for statement coverage and branch coverage. Further quality controls of the developed tests were carried out through [Pitest](https://github.com/hcoles/pitest) (aka PIT) tool, to verify their robustness to SUT mutations.
 
 [Mockito](https://github.com/mockito/mockito) was used to simulate the execution environment and [GitHub Actions](https://github.com/features/actions) was used as a continuous integration tool.
 
